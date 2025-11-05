@@ -1,13 +1,9 @@
-// src/pages/ErrorPage.jsx
 import React from "react";
 
 export default function ErrorPage({ message }) {
   return (
-    <div className="flex items-center justify-center h-screen bg-red-50">
-      <div className="bg-white p-8 rounded shadow text-center max-w-md">
-        <h1 className="text-2xl font-bold mb-4 text-red-600">Ops!</h1>
-        <p className="text-gray-700">{message || "Ocorreu um erro."}</p>
-      </div>
+    <div className="flex flex-col justify-center items-center h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+      <h1 className="text-4xl font-bold text-slate-900">{message}</h1>
     </div>
   );
 }

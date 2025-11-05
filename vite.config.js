@@ -10,5 +10,5 @@ export default defineConfig({
       "@": path.resolve(__dirname, "src"),
     },
   },
-  base: "/", // IMPORTANTE para React Router
+  base: "/", // importante para React Router e assets
 });
