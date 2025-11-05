@@ -8,16 +8,25 @@ export function useTokenValidation(token) {
   const [status, setStatus] = useState("loading");
 
   useEffect(() => {
-    if (!token) return setStatus("invalid");
+    if (!token) {
+      setStatus("invalid");
+      return;
+    }
 
     const fetchToken = async () => {
-      const snapshot = await get(child(ref(db), `tokens/${token}`));
-      if (!snapshot.exists()) {
-        setStatus("invalid");
-      } else if (snapshot.val().respondido) {
-        setStatus("respondido");
-      } else {
-        setStatus("valid");
+      try {
+        const snapshot = await get(child(ref(db), `tokens/${token}`));
+
+        if (!snapshot.exists()) {
+          setStatus("invalid");
+        } else if (snapshot.val().respondido) {
+          setStatus("respondido");
+        } else {
+          setStatus("valid");
+        }
+      } catch (error) {
+        console.error("Erro ao validar token:", error);
+        setStatus("invalid"); // fallback em caso de erro
       }
     };
 
