@@ -24,7 +24,7 @@
 // src/App.jsx
 import React from "react";
 import { useSearchParams } from "react-router-dom";
-import { useTokenValidation } from "./hooks/useTokenValidation";
+import { useTokenValidation } from "../hooks/useTokenValidation";
 import FormPage from "./pages/FormPage";
 import ErrorPage from "./pages/ErrorPage";
 
