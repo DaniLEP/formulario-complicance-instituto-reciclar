@@ -3,9 +3,8 @@ import { useEffect, useState } from "react";
 import { ref, get, child } from "firebase/database";
 import { db } from "../firebase";
 
-
 export function useTokenValidation(token) {
-  const [status, setStatus] = useState("loading");
+  const [status, setStatus] = useState("loading"); // "loading" | "valid" | "invalid" | "respondido"
 
   useEffect(() => {
     if (!token) {
@@ -16,17 +15,12 @@ export function useTokenValidation(token) {
     const fetchToken = async () => {
       try {
         const snapshot = await get(child(ref(db), `tokens/${token}`));
-
-        if (!snapshot.exists()) {
-          setStatus("invalid");
-        } else if (snapshot.val().respondido) {
-          setStatus("respondido");
-        } else {
-          setStatus("valid");
-        }
+        if (!snapshot.exists()) setStatus("invalid");
+        else if (snapshot.val().respondido) setStatus("respondido");
+        else setStatus("valid");
       } catch (error) {
         console.error("Erro ao validar token:", error);
-        setStatus("invalid"); // fallback em caso de erro
+        setStatus("invalid");
       }
     };
 
