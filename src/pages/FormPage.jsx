@@ -1,43 +1,19 @@
-import React, { useState, useEffect } from "react";
-import { ref, set, update, get } from "firebase/database";
+import React, { useState } from "react";
+import { ref, set, update } from "firebase/database";
 import { db } from "../../firebase";
+import { useTokenValidation } from "../../hooks/useTokenValidation";
 
 export default function FormPage() {
-  const [token, setToken] = useState(null);
-  const [tokenValid, setTokenValid] = useState(false);
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get("token");
+
+  const status = useTokenValidation(token);
+
   const [formData, setFormData] = useState(
     Object.fromEntries(Array.from({ length: 10 }, (_, i) => [`pergunta${i + 1}`, ""]))
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [loading, setLoading] = useState(true);
-
-  // Captura token da URL e valida no Firebase
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const t = params.get("token");
-    setToken(t);
-
-    if (t) {
-      const tokenRef = ref(db, `tokens/${t}`);
-      get(tokenRef)
-        .then((snapshot) => {
-          if (snapshot.exists() && !snapshot.val().used) {
-            setTokenValid(true);
-          } else {
-            setTokenValid(false);
-          }
-        })
-        .catch((err) => {
-          console.error(err);
-          setTokenValid(false);
-        })
-        .finally(() => setLoading(false));
-    } else {
-      setTokenValid(false);
-      setLoading(false);
-    }
-  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -53,14 +29,12 @@ export default function FormPage() {
 
     setIsSubmitting(true);
     try {
-      // Salva respostas no Firebase
       await set(ref(db, `responses/${token}`), {
         token,
         respostas: formData,
         dataEnvio: new Date().toISOString(),
       });
 
-      // Marca token como usado
       await update(ref(db, `tokens/${token}`), {
         used: true,
         completedAt: new Date().toISOString(),
@@ -75,14 +49,9 @@ export default function FormPage() {
     }
   };
 
-  if (loading) return <p>Carregando...</p>;
-
-  if (!token || !tokenValid)
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <p className="text-red-600 text-lg">Token inválido ou já utilizado!</p>
-      </div>
-    );
+  if (status === "loading") return <p>Carregando...</p>;
+  if (status === "invalid") return <p className="text-red-600">Token inválido!</p>;
+  if (status === "respondido") return <p className="text-red-600">Token já utilizado!</p>;
 
   if (submitted)
     return (
@@ -90,15 +59,12 @@ export default function FormPage() {
         <div className="bg-white/5 backdrop-blur-xl p-12 rounded-2xl text-center shadow-2xl max-w-md border border-white/10">
           <div className="mb-4 text-4xl">✓</div>
           <h1 className="text-3xl font-bold text-white mb-3">Resposta enviada com sucesso</h1>
-          <p className="text-blue-100 text-base leading-relaxed">
-            Agradecemos sua colaboração e compromisso com o Compliance.
-          </p>
         </div>
       </div>
     );
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-gradient-to-br from-slate-50 via-white to-slate-100">
+    <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-gray-50">
       <form onSubmit={handleSubmit} className="w-full max-w-2xl space-y-6">
         {Object.keys(formData).map((key) => (
           <div key={key} className="flex flex-col">
@@ -107,7 +73,7 @@ export default function FormPage() {
               name={key}
               value={formData[key]}
               onChange={handleChange}
-              className="border rounded p-2"
+              className="border p-2 rounded"
               required
             />
           </div>
