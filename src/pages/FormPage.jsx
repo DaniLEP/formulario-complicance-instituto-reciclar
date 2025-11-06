@@ -1,12 +1,43 @@
-import React, { useState } from "react";
-import { ref, set, update } from "../../firebase";
+import React, { useState, useEffect } from "react";
+import { ref, set, update, get } from "firebase/database";
+import { db } from "../../firebase";
 
-export default function FormPage({ token }) {
+export default function FormPage() {
+  const [token, setToken] = useState(null);
+  const [tokenValid, setTokenValid] = useState(false);
   const [formData, setFormData] = useState(
     Object.fromEntries(Array.from({ length: 10 }, (_, i) => [`pergunta${i + 1}`, ""]))
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  // Captura token da URL e valida no Firebase
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const t = params.get("token");
+    setToken(t);
+
+    if (t) {
+      const tokenRef = ref(db, `tokens/${t}`);
+      get(tokenRef)
+        .then((snapshot) => {
+          if (snapshot.exists() && !snapshot.val().used) {
+            setTokenValid(true);
+          } else {
+            setTokenValid(false);
+          }
+        })
+        .catch((err) => {
+          console.error(err);
+          setTokenValid(false);
+        })
+        .finally(() => setLoading(false));
+    } else {
+      setTokenValid(false);
+      setLoading(false);
+    }
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -22,12 +53,14 @@ export default function FormPage({ token }) {
 
     setIsSubmitting(true);
     try {
+      // Salva respostas no Firebase
       await set(ref(db, `responses/${token}`), {
         token,
         respostas: formData,
         dataEnvio: new Date().toISOString(),
       });
 
+      // Marca token como usado
       await update(ref(db, `tokens/${token}`), {
         used: true,
         completedAt: new Date().toISOString(),
@@ -41,6 +74,15 @@ export default function FormPage({ token }) {
       setIsSubmitting(false);
     }
   };
+
+  if (loading) return <p>Carregando...</p>;
+
+  if (!token || !tokenValid)
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <p className="text-red-600 text-lg">Token inválido ou já utilizado!</p>
+      </div>
+    );
 
   if (submitted)
     return (
