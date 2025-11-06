@@ -1,12 +1,15 @@
 import React from "react";
-import { useSearchParams } from "react-router-dom";
-import { useTokenValidation } from "../hooks/useTokenValidation";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import FormPage from "./pages/FormPage";
 import ErrorPage from "./pages/ErrorPage";
+import { useTokenValidation } from "../hooks/useTokenValidation";
 
-export default function App() {
-  const [params] = useSearchParams();
+function FormWrapper() {
+  // Captura token da query string
+  const params = new URLSearchParams(window.location.search);
   const token = params.get("token");
+
+  // Valida token no Firebase
   const status = useTokenValidation(token);
 
   if (status === "loading")
@@ -23,4 +26,18 @@ export default function App() {
     return <ErrorPage message="Este formulário já foi preenchido." />;
 
   return <FormPage token={token} />;
+}
+
+export default function App() {
+  return (
+    <Router>
+      <Routes>
+        {/* Rota dedicada para o formulário */}
+        <Route path="/form" element={<FormWrapper />} />
+
+        {/* Rota coringa para páginas inexistentes */}
+        <Route path="*" element={<ErrorPage message="Página não encontrada." />} />
+      </Routes>
+    </Router>
+  );
 }
