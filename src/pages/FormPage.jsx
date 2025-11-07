@@ -1,4 +1,4 @@
-"use client"
+// "use client"
 
 import { useState } from "react"
 import { ref, set, update } from "firebase/database"
@@ -11,53 +11,24 @@ export default function FormPage() {
 
   const status = useTokenValidation(token)
 
-  // Estrutura de perguntas
   const perguntas = [
-    // 5 Dissertativas
     { tipo: "texto", pergunta: "Como você avalia o ambiente físico da instituição?" },
     { tipo: "texto", pergunta: "Quais melhorias você sugeriria para o processo de ensino?" },
     { tipo: "texto", pergunta: "Como você avalia o relacionamento entre alunos e professores?" },
     { tipo: "texto", pergunta: "Comente sobre a qualidade do suporte administrativo oferecido." },
     { tipo: "texto", pergunta: "O que mais te motiva a participar das atividades da instituição?" },
 
-    // 5 Múltipla escolha
-    {
-      tipo: "multipla",
-      pergunta: "A comunicação institucional é clara e eficiente?",
-      opcoes: ["Excelente", "Boa", "Regular", "Ruim"],
-    },
-    {
-      tipo: "multipla",
-      pergunta: "Como você avalia a qualidade do material didático?",
-      opcoes: ["Excelente", "Boa", "Regular", "Ruim"],
-    },
-    {
-      tipo: "multipla",
-      pergunta: "O atendimento da secretaria é satisfatório?",
-      opcoes: ["Sim, totalmente", "Parcialmente", "Não muito", "De forma alguma"],
-    },
-    {
-      tipo: "multipla",
-      pergunta: "Você recomendaria a instituição a outras pessoas?",
-      opcoes: ["Com certeza", "Provavelmente", "Talvez", "Não"],
-    },
-    {
-      tipo: "multipla",
-      pergunta: "Os professores demonstram domínio do conteúdo?",
-      opcoes: ["Sim", "Parcialmente", "Não"],
-    },
+    { tipo: "multipla", pergunta: "A comunicação institucional é clara e eficiente?", opcoes: ["Excelente", "Boa", "Regular", "Ruim"] },
+    { tipo: "multipla", pergunta: "Como você avalia a qualidade do material didático?", opcoes: ["Excelente", "Boa", "Regular", "Ruim"] },
+    { tipo: "multipla", pergunta: "O atendimento da secretaria é satisfatório?", opcoes: ["Sim, totalmente", "Parcialmente", "Não muito", "De forma alguma"] },
+    { tipo: "multipla", pergunta: "Você recomendaria a instituição a outras pessoas?", opcoes: ["Com certeza", "Provavelmente", "Talvez", "Não"] },
+    { tipo: "multipla", pergunta: "Os professores demonstram domínio do conteúdo?", opcoes: ["Sim", "Parcialmente", "Não"] },
 
-    // Extras
     { tipo: "texto", pergunta: "Quais atividades extracurriculares você considera mais relevantes?" },
-    {
-      tipo: "multipla",
-      pergunta: "Com que frequência você utiliza os recursos digitais da instituição?",
-      opcoes: ["Diariamente", "Semanalmente", "Raramente", "Nunca"],
-    },
+    { tipo: "multipla", pergunta: "Com que frequência você utiliza os recursos digitais da instituição?", opcoes: ["Diariamente", "Semanalmente", "Raramente", "Nunca"] },
     { tipo: "texto", pergunta: "Deixe um comentário livre sobre sua experiência geral." },
   ]
 
-  // Paginação
   const [paginaAtual, setPaginaAtual] = useState(0)
   const perguntasPorPagina = 5
   const totalPaginas = Math.ceil(perguntas.length / perguntasPorPagina)
@@ -66,13 +37,11 @@ export default function FormPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
 
-  // Mudança de valores
   const handleChange = (e) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
-  // Envio final
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (!Object.values(formData).every((v) => v.trim() !== "")) {
@@ -102,9 +71,8 @@ export default function FormPage() {
     }
   }
 
-  // Navegação
   const proximaPagina = () => setPaginaAtual((p) => Math.min(p + 1, totalPaginas - 1))
-  const paginaAnterior = () => setPaginaAtual((p) => Math.max(p - 1, 0))
+  const paginaAnterior = () => setPaginaAtual((p) => Math.max(p, 0))
 
   if (status === "loading")
     return (
@@ -140,7 +108,7 @@ export default function FormPage() {
     return (
       <div className="min-h-screen flex items-center justify-center p-6 bg-gradient-to-br from-slate-50 via-slate-100 to-slate-50">
         <div className="bg-white p-12 rounded-xl shadow-xl max-w-md text-center border border-slate-200">
-          <div className="w-16 h-16 bg-gradient-to-br from-teal-400 to-teal-600 rounded-full flex items-center justify-center mx-auto mb-6">
+          <div className="w-16 h-16 bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-800 rounded-full flex items-center justify-center mx-auto mb-6">
             <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
             </svg>
@@ -151,7 +119,6 @@ export default function FormPage() {
       </div>
     )
 
-  // Perguntas da página atual
   const inicio = paginaAtual * perguntasPorPagina
   const fim = inicio + perguntasPorPagina
   const perguntasVisiveis = perguntas.slice(inicio, fim)
@@ -161,13 +128,13 @@ export default function FormPage() {
       <div className="w-full max-w-2xl mb-8">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-sm font-semibold text-slate-700">Progresso do Formulário</h3>
-          <span className="text-sm font-medium text-teal-700">
+          <span className="text-sm font-medium bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-800 bg-clip-text text-transparent">
             {paginaAtual + 1} de {totalPaginas}
           </span>
         </div>
         <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
           <div
-            className="h-full bg-gradient-to-r from-teal-500 to-teal-600 transition-all duration-300"
+            className="h-full bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-800 transition-all duration-300"
             style={{ width: `${((paginaAtual + 1) / totalPaginas) * 100}%` }}
           ></div>
         </div>
@@ -188,7 +155,7 @@ export default function FormPage() {
             <div key={nomeCampo} className="space-y-3">
               <label className="block">
                 <span className="text-sm font-semibold text-slate-700 mb-1 block">
-                  <span className="text-teal-600 font-bold">{inicio + index + 1}.</span> {q.pergunta}
+                  <span className="bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-800 bg-clip-text text-transparent font-bold">{inicio + index + 1}.</span> {q.pergunta}
                 </span>
               </label>
 
@@ -198,7 +165,7 @@ export default function FormPage() {
                   value={formData[nomeCampo]}
                   onChange={handleChange}
                   rows={4}
-                  className="w-full px-4 py-3 rounded-lg border border-slate-300 bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition resize-none"
+                  className="w-full px-4 py-3 rounded-lg border border-slate-300 bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-900 focus:border-transparent transition resize-none"
                   placeholder="Digite sua resposta aqui..."
                   required
                 />
@@ -207,7 +174,7 @@ export default function FormPage() {
                   {q.opcoes.map((opcao) => (
                     <label
                       key={opcao}
-                      className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 hover:border-teal-300 cursor-pointer transition group"
+                      className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 bg-white hover:bg-gradient-to-br hover:from-indigo-900 hover:via-purple-900 hover:to-pink-800 cursor-pointer transition group"
                     >
                       <input
                         type="radio"
@@ -215,10 +182,10 @@ export default function FormPage() {
                         value={opcao}
                         checked={formData[nomeCampo] === opcao}
                         onChange={handleChange}
-                        className="w-5 h-5 text-teal-600 border-slate-300 focus:ring-teal-500 cursor-pointer"
+                        className="w-5 h-5 text-indigo-900 border-slate-300 focus:ring-indigo-900 cursor-pointer"
                         required
                       />
-                      <span className="text-slate-700 font-medium group-hover:text-slate-900">{opcao}</span>
+                      <span className="text-slate-700 group-hover:text-white font-medium">{opcao}</span>
                     </label>
                   ))}
                 </div>
@@ -243,7 +210,11 @@ export default function FormPage() {
                 key={i}
                 type="button"
                 onClick={() => setPaginaAtual(i)}
-                className={`w-2 h-2 rounded-full transition ${i === paginaAtual ? "bg-teal-600" : "bg-slate-300"}`}
+                className={`w-2 h-2 rounded-full transition ${
+                  i === paginaAtual
+                    ? "bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-800"
+                    : "bg-slate-300"
+                }`}
               />
             ))}
           </div>
@@ -252,7 +223,7 @@ export default function FormPage() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="px-6 py-2.5 bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-700 hover:to-teal-800 text-white font-semibold rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition shadow-md"
+              className="px-6 py-2.5 bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-800 text-white font-semibold rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition shadow-md"
             >
               {isSubmitting ? "Enviando..." : "Enviar"}
             </button>
@@ -260,7 +231,7 @@ export default function FormPage() {
             <button
               type="button"
               onClick={proximaPagina}
-              className="px-6 py-2.5 bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-700 hover:to-teal-800 text-white font-semibold rounded-lg transition shadow-md"
+              className="px-6 py-2.5 bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-800 text-white font-semibold rounded-lg transition shadow-md"
             >
               Próxima
             </button>
@@ -268,9 +239,10 @@ export default function FormPage() {
         </div>
       </form>
 
-      <p className="mt-8 text-sm text-slate-500 text-center">
-        Seus dados estão protegidos e serão tratados com confidencialidade
-      </p>
+     <p className="mt-8 text-sm text-slate-500 text-center">
+      Seus dados estão protegidos e serão tratados com confidencialidade, em conformidade com a LGPD.
+    </p>
+
     </div>
   )
 }
